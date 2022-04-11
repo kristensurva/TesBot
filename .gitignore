@@ -1,0 +1,9 @@
+node_modules/
+Data/
+.vscode/
+.vs/
+.eslintrc.json
+config.json
+other/
+table.png
+scripts/mergedData
