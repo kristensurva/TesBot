@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import dataframe_image as dfi
 
-mergedData = pd.read_pickle("D:/Desktop/Projects/bot/scripts/mergedData")
+mergedData = pd.read_pickle("D:/Desktop/Projects/TesBot/scripts/mergedData")
 
 def countString(text, top=15):
     text = text.lower()
