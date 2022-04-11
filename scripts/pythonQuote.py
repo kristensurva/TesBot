@@ -1,7 +1,7 @@
 import sys
 import pandas as pd
 
-mergedData = pd.read_pickle("D:/Desktop/Projects/bot/scripts/mergedData")
+mergedData = pd.read_pickle("D:/Desktop/Projects/TesBot/scripts/mergedData")
 
 def randomQuote(name = ""):
     name = name.lower()
