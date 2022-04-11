@@ -1,17 +1,17 @@
 //import {PythonShell} from 'python-shell';
-const { PythonShell } = require('python-shell');
+import { PythonShell } from 'python-shell';
 
-async function pythonScriptQuote(input) {
+async function pythonScriptQuote({ user = "" }) {
 
   let options = {
     mode: 'text',
     pythonOptions: ['-u'],
-    scriptPath: './scripts', 
-    args: [input]
+    scriptPath: './scripts',
+    args: [user]
   };
 
-  const { success, err = '', results } = await new Promise((resolve, reject) => {
-    PythonShell.run('pythonQuote.py', options, function(err,results) {
+  const { success, results } = await new Promise((resolve, reject) => {
+    PythonShell.run('pythonQuote.py', options, function (err, results) {
       if (err) {
         console.log(err)
         reject({ success: false, err });
@@ -19,22 +19,22 @@ async function pythonScriptQuote(input) {
       resolve({ success: true, results });
     });
   });
-    if (success) {
-      return results[0]
-    }
+  if (success) {
+    return results[0]
+  }
 }
 
-async function pythonScriptCount(text, top) {
+async function pythonScriptCount({ text, top = 15 }) {
 
   let options = {
     mode: 'text',
     pythonOptions: ['-u'],
-    scriptPath: './scripts', 
+    scriptPath: './scripts',
     args: [text, top]
   };
 
-  const { success, err = '', results } = await new Promise((resolve, reject) => {
-    PythonShell.run('pythonCount.py', options, function(err,results) {
+  const { success, results } = await new Promise((resolve, reject) => {
+    PythonShell.run('pythonCount.py', options, function (err, results) {
       if (err) {
         console.log(err)
         reject({ success: false, err });
@@ -42,12 +42,12 @@ async function pythonScriptCount(text, top) {
       resolve({ success: true, results });
     });
   });
-    if (success) {
-      return results[0]
-    }
+  if (success) {
+    return results[0]
+  }
 }
 
-module.exports = {
+export {
   pythonScriptQuote,
   pythonScriptCount
 }
