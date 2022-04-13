@@ -1,8 +1,7 @@
 // Require the necessary discord.js classes
 import { Client, Collection, Intents } from 'discord.js';
-import { token } from './config.js';
-import { Buffer } from 'buffer';
-
+import { apiURL, token } from './config.js';
+import fetch from 'node-fetch';
 // Create a new client instance
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 import { pythonScriptQuote, pythonScriptCount } from './pythonpart.js';
@@ -30,9 +29,9 @@ client.on('interactionCreate', async interaction => {
 		do {
 			messages = await interaction.channel.messages.fetch({ limit: 100, before: lastMessage });
 			lastMessage = messages?.last()?.id
-			filtered = messages.filter(message => message.reactions.cache.some(reaction => GALLERY_REACTIONS.includes(reaction.emoji.name)) || (message.author.id == '300246286580318209' && message.content.includes('prompts')));
+			filtered = messages.filter(message => message.reactions.cache.some(reaction => GALLERY_REACTIONS.includes(reaction.emoji.name)) || (message.author.id == '300246286580318209' && message.content.includes('prompts')) || (message.author.id == '168034871724343296' && message.content.includes('----------')));
 			all = all.concat(filtered);
-			console.log(all.size , 'messages collected')
+			console.log(all.size, 'messages collected')
 		}
 		while (messages.size)
 		return all;
@@ -63,8 +62,14 @@ client.on('interactionCreate', async interaction => {
 			break;
 		case 'gallery':
 			messageCollection = await _getAllMessages();
-			messageCollection = messageCollection.map(({ author, content, reactions, attachments }) => ({
-				content: author.id == '300246286580318209' ? content.split('\n')[3].slice(2, -2) : content, image: attachments?.first()?.url,
+			messageCollection = messageCollection.map(({ author, content, reactions, attachments, embeds }) => ({
+				content: author.id == '300246286580318209' || content.includes('----------') ? content.split('\n')[3].slice(2, -2) : content,
+				image: {
+					src: attachments?.first()?.url || embeds?.[0]?.url,
+					thumb: attachments?.first()?.proxyURL || embeds?.[0]?.thumbnail?.proxyURL,
+					width: attachments?.first()?.width || embeds?.[0]?.thumbnail?.width,
+					height: attachments?.first()?.height || embeds?.[0]?.thumbnail?.height
+				},
 				user: {
 					id: author.id,
 					name: author.username,
@@ -77,7 +82,7 @@ client.on('interactionCreate', async interaction => {
 			})).filter(({ user, content }) => user.id != '300246286580318209' || content).reverse();
 			reply = {};
 			for (let i = 0, currentDaily, currentWeekly, previousDaily, previousWeekly; i < messageCollection.length; i++) {
-				if (messageCollection[i].user.id == '300246286580318209') {
+				if (messageCollection[i].user.id == '300246286580318209' || messageCollection[i].content.includes('oc alt colors,  mineral,  Twilight Velvet')) {
 					if (messageCollection[i].daily) {
 						previousDaily && (reply[previousDaily].entries.sort((a, b) => a.order - b.order));
 						previousDaily = currentDaily;
@@ -97,7 +102,13 @@ client.on('interactionCreate', async interaction => {
 					messageCollection[i].weekly && reply[messageCollection[i].previous ? previousWeekly : currentWeekly].entries.push(messageCollection[i])
 				}
 			}
-			interaction.channel.send({ files: [{ attachment: Buffer.from(JSON.stringify(reply)), name: 'data.json' }] })
+			fetch(apiURL, {
+				method: 'put',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(reply)
+			})
 			break;
 	}
 });
