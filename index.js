@@ -9,6 +9,8 @@ import { pythonScriptQuote, pythonScriptCount } from './pythonpart.js';
 const GALLERY_REACTIONS = ['0daily', '0weekly'];
 const NUMBER_EMOJIS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
 
+let lastGalleryCall;
+
 // When the client is ready, run this code (only once)
 client.once('ready', () => {
 	console.log('Ready!');
@@ -61,6 +63,12 @@ client.on('interactionCreate', async interaction => {
 			}
 			break;
 		case 'gallery':
+			if (lastGalleryCall + (5 * 60 * 1000) > Date.now()) {
+				interaction.reply({ content: `Too soon, retry in: ${Math.round((lastGalleryCall + (5 * 60 * 1000) - Date.now()) / (1000 * 60))} minutes`, ephemeral: true })
+				return;
+			}
+			lastGalleryCall = Date.now();
+			interaction.reply({ content: "Working on it", ephemeral: true })
 			messageCollection = await _getAllMessages();
 			messageCollection = messageCollection.map(({ author, content, reactions, attachments, embeds }) => ({
 				content: author.id == '300246286580318209' || content.includes('----------') ? content.split('\n')[3].slice(2, -2) : content,
@@ -102,13 +110,19 @@ client.on('interactionCreate', async interaction => {
 					messageCollection[i].weekly && reply[messageCollection[i].previous ? previousWeekly : currentWeekly].entries.push(messageCollection[i])
 				}
 			}
-			fetch(apiURL, {
-				method: 'put',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(reply)
-			})
+			try {
+				await fetch(apiURL, {
+					method: 'put',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(reply)
+				})
+				interaction.channel.send("Gallery has been updated!")
+			}
+			catch (err) {
+				interaction.channel.send("Gallery update error.")
+			}
 			break;
 	}
 });
