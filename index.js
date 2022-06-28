@@ -70,8 +70,9 @@ client.on('interactionCreate', async interaction => {
 			lastGalleryCall = Date.now();
 			interaction.reply({ content: "Working on it", ephemeral: true })
 			messageCollection = await _getAllMessages();
+			let exceptions = [];
 			messageCollection = messageCollection.map(({ author, content, reactions, attachments, embeds }) => ({
-				content: author.id == '300246286580318209' || content.includes('----------') ? content.split('\n')[3].slice(2, -2) : content,
+				content: (author.id == '300246286580318209') ? content.split('\n')[3].slice(2, -2) : content.includes('----------') ? (exceptions.push(content.split('\n')[3].slice(2, -2)), content.split('\n')[3].slice(2, -2)) : content,
 				image: {
 					src: attachments?.first()?.url || embeds?.[0]?.url,
 					thumb: attachments?.first()?.proxyURL || embeds?.[0]?.thumbnail?.proxyURL,
@@ -90,7 +91,7 @@ client.on('interactionCreate', async interaction => {
 			})).filter(({ user, content }) => user.id != '300246286580318209' || content).reverse();
 			reply = {};
 			for (let i = 0, currentDaily, currentWeekly, previousDaily, previousWeekly; i < messageCollection.length; i++) {
-				if (messageCollection[i].user.id == '300246286580318209' || messageCollection[i].content.includes('oc alt colors,  mineral,  Twilight Velvet')) {
+				if (messageCollection[i].user.id == '300246286580318209' || exceptions.includes(messageCollection[i].content)) {
 					if (messageCollection[i].daily) {
 						previousDaily && (reply[previousDaily].entries.sort((a, b) => a.order - b.order));
 						previousDaily = currentDaily;
