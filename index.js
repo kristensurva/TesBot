@@ -115,7 +115,7 @@ client.on('interactionCreate', async interaction => {
 				}
 			}
 			try {
-				await fetch(apiURL, {
+				await fetch(apiURL.replace("{year}", args.year ?? new Date().getFullYear()), {
 					method: 'put',
 					headers: {
 						'Content-Type': 'application/json'
