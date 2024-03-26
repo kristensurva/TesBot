@@ -8,6 +8,9 @@ import { pythonScriptQuote, pythonScriptCount } from './pythonpart.js';
 
 const GALLERY_REACTIONS = ['0daily', '0weekly'];
 const NUMBER_EMOJIS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
+const RAT_ID = "300246286580318209";
+const PROMPTER_ID = "1191382581422342244";
+const PROMPTS_POSTER_IDS = [RAT_ID, PROMPTER_ID];
 
 let lastGalleryCall;
 
@@ -31,7 +34,7 @@ client.on('interactionCreate', async interaction => {
 		do {
 			messages = await interaction.channel.messages.fetch({ limit: 100, before: lastMessage });
 			lastMessage = messages?.last()?.id
-			filtered = messages.filter(message => message.reactions.cache.some(reaction => GALLERY_REACTIONS.includes(reaction.emoji.name)) || (message.author.id == '300246286580318209' && message.content.includes('prompts')) || (message.author.id == '168034871724343296' && message.content.includes('----------')));
+			filtered = messages.filter(message => message.reactions.cache.some(reaction => GALLERY_REACTIONS.includes(reaction.emoji.name)) || (PROMPTS_POSTER_IDS.includes(message.author.id) && message.content.includes('prompts') && !message.content.includes('reminder for')) || (message.author.id == '168034871724343296' && message.content.includes('----------')));
 			all = all.concat(filtered);
 			console.log(all.size, 'messages collected')
 		}
@@ -72,7 +75,7 @@ client.on('interactionCreate', async interaction => {
 			messageCollection = await _getAllMessages();
 			let exceptions = [];
 			messageCollection = messageCollection.map(({ author, content, reactions, attachments, embeds }) => ({
-				content: (author.id == '300246286580318209') ? content.split('\n')[3].slice(2, -2) : content.includes('----------') ? (exceptions.push(content.split('\n')[3].slice(2, -2)), content.split('\n')[3].slice(2, -2)) : content,
+				content: PROMPTS_POSTER_IDS.includes(author.id) ? content.split('\n')[3].slice(2, -2) : content.includes('----------') ? (exceptions.push(content.split('\n')[3].slice(2, -2)), content.split('\n')[3].slice(2, -2)) : content,
 				image: {
 					src: attachments?.first()?.url || embeds?.[0]?.url,
 					thumb: attachments?.first()?.proxyURL || embeds?.[0]?.thumbnail?.proxyURL,
@@ -88,10 +91,10 @@ client.on('interactionCreate', async interaction => {
 				weekly: reactions.cache.some(reaction => reaction.emoji.name == '0weekly') || content.includes('weekly prompts'),
 				previous: reactions.cache.some(reaction => reaction.emoji.name == '⬅️'),
 				order: NUMBER_EMOJIS.indexOf(reactions.cache.find(reaction => NUMBER_EMOJIS.includes(reaction.emoji.name))?.emoji.name)
-			})).filter(({ user, content }) => user.id != '300246286580318209' || content).reverse();
+			})).filter(({ user, content }) => !PROMPTS_POSTER_IDS.includes(user.id) || content).reverse();
 			reply = {};
 			for (let i = 0, currentDaily, currentWeekly, previousDaily, previousWeekly; i < messageCollection.length; i++) {
-				if (messageCollection[i].user.id == '300246286580318209' || exceptions.includes(messageCollection[i].content)) {
+				if (PROMPTS_POSTER_IDS.includes(messageCollection[i].user.id) || exceptions.includes(messageCollection[i].content)) {
 					if (messageCollection[i].daily) {
 						previousDaily && (reply[previousDaily].entries.sort((a, b) => a.order - b.order));
 						previousDaily = currentDaily;
