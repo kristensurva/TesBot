@@ -20,6 +20,10 @@
 					.setDescription('The number of people to display')
 					.setRequired(false)),
 		new SlashCommandBuilder().setName('gallery').setDescription('Sends JSON with data for gallery')
+			.addStringOption(option =>
+					option.setName('year')
+						.setDescription('Gallery year to update, defaults to current year')
+						.setRequired(false))
 		// .addBooleanOption(option =>
 		// 	option.setName('exact')
 		// 		.setDescription('Ignores text matches within other words')
