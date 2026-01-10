@@ -28,17 +28,31 @@ client.on('interactionCreate', async interaction => {
 	let messageCollection;
 	const _getAllMessages = async () => {
 		let messages = new Collection();
-		let lastMessage;
+		let lastMessageId;
+		let lastMessageYear;
 		let filtered = new Collection();
 		let all = new Collection();
+		const thisYear = new Date().getFullYear();
 		do {
-			messages = await interaction.channel.messages.fetch({ limit: 100, before: lastMessage });
-			lastMessage = messages?.last()?.id
-			filtered = messages.filter(message => message.reactions.cache.some(reaction => GALLERY_REACTIONS.includes(reaction.emoji.name)) || (PROMPTS_POSTER_IDS.includes(message.author.id) && message.content.includes('prompts') && !message.content.includes('reminder for')) || (message.author.id == '168034871724343296' && message.content.includes('----------')));
+			messages = await interaction.channel.messages.fetch({ limit: 100, before: lastMessageId });
+			const lastMessage = messages?.last();
+			lastMessageYear = lastMessage?.createdAt.getFullYear();
+			lastMessageId = lastMessage?.id;
+			if (lastMessageYear > (args.year ?? thisYear)) {
+				continue;
+			}
+			filtered = messages.filter(message => 
+				(message.reactions.cache.some(reaction => GALLERY_REACTIONS.includes(reaction.emoji.name))
+					|| (PROMPTS_POSTER_IDS.includes(message.author.id)
+						&& message.content.includes('prompts')
+						&& !message.content.includes('reminder for'))
+					|| (message.author.id == '168034871724343296'
+						&& message.content.includes('----------')))
+				&& message.createdAt.getFullYear() == thisYear);
 			all = all.concat(filtered);
 			console.log(all.size, 'messages collected')
 		}
-		while (messages.size)
+		while (messages.size && lastMessageYear >= thisYear)
 		return all;
 	}
 
@@ -80,7 +94,9 @@ client.on('interactionCreate', async interaction => {
 					src: attachments?.first()?.url || embeds?.[0]?.url,
 					thumb: attachments?.first()?.proxyURL || embeds?.[0]?.thumbnail?.proxyURL,
 					width: attachments?.first()?.width || embeds?.[0]?.thumbnail?.width,
-					height: attachments?.first()?.height || embeds?.[0]?.thumbnail?.height
+					height: attachments?.first()?.height || embeds?.[0]?.thumbnail?.height,
+					spoiler: attachments?.first()?.spoier,
+					reactions: reactions.cache.filter(reaction => !['⬅️'].concat(GALLERY_REACTIONS).concat(NUMBER_EMOJIS).includes(reaction.emoji.name)).map(reaction => ({ count: reaction.count, emoji: reaction.emoji.url, name: reaction.emoji.name })),
 				},
 				user: {
 					id: author.id,
