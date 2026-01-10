@@ -95,7 +95,7 @@ client.on('interactionCreate', async interaction => {
 					thumb: attachments?.first()?.proxyURL || embeds?.[0]?.thumbnail?.proxyURL,
 					width: attachments?.first()?.width || embeds?.[0]?.thumbnail?.width,
 					height: attachments?.first()?.height || embeds?.[0]?.thumbnail?.height,
-					spoiler: attachments?.first()?.spoier,
+					spoiler: attachments?.first()?.spoiler,
 					reactions: reactions.cache.filter(reaction => !['⬅️'].concat(GALLERY_REACTIONS).concat(NUMBER_EMOJIS).includes(reaction.emoji.name)).map(reaction => ({ count: reaction.count, emoji: reaction.emoji.url, name: reaction.emoji.name })),
 				},
 				user: {
