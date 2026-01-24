@@ -107,7 +107,7 @@ client.on('interactionCreate', async interaction => {
 				weekly: reactions.cache.some(reaction => reaction.emoji.name == '0weekly') || content.includes('weekly prompts'),
 				previous: reactions.cache.some(reaction => reaction.emoji.name == '⬅️'),
 				order: NUMBER_EMOJIS.indexOf(reactions.cache.find(reaction => NUMBER_EMOJIS.includes(reaction.emoji.name))?.emoji.name)
-			})).filter(({ user, content }) => !PROMPTS_POSTER_IDS.includes(user.id) || content).reverse();
+			})).filter(({ user, content }) => !PROMPTS_POSTER_IDS.includes(user.id) || content).toReversed();
 			reply = {};
 			for (let i = 0, currentDaily, currentWeekly, previousDaily, previousWeekly; i < messageCollection.length; i++) {
 				if (PROMPTS_POSTER_IDS.includes(messageCollection[i].user.id) || exceptions.includes(messageCollection[i].content)) {
