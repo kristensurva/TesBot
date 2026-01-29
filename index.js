@@ -96,7 +96,6 @@ client.on('interactionCreate', async interaction => {
 					width: attachments?.first()?.width || embeds?.[0]?.thumbnail?.width,
 					height: attachments?.first()?.height || embeds?.[0]?.thumbnail?.height,
 					spoiler: attachments?.first()?.spoiler,
-					reactions: reactions.cache.filter(reaction => !['⬅️'].concat(GALLERY_REACTIONS).concat(NUMBER_EMOJIS).includes(reaction.emoji.name)).map(reaction => ({ count: reaction.count, emoji: reaction.emoji.url, name: reaction.emoji.name })),
 				},
 				user: {
 					id: author.id,
@@ -106,7 +105,8 @@ client.on('interactionCreate', async interaction => {
 				daily: reactions.cache.some(reaction => reaction.emoji.name == '0daily') || content.includes('daily prompts'),
 				weekly: reactions.cache.some(reaction => reaction.emoji.name == '0weekly') || content.includes('weekly prompts'),
 				previous: reactions.cache.some(reaction => reaction.emoji.name == '⬅️'),
-				order: NUMBER_EMOJIS.indexOf(reactions.cache.find(reaction => NUMBER_EMOJIS.includes(reaction.emoji.name))?.emoji.name)
+				order: NUMBER_EMOJIS.indexOf(reactions.cache.find(reaction => NUMBER_EMOJIS.includes(reaction.emoji.name))?.emoji.name),
+				reactions: reactions.cache.filter(reaction => !['⬅️'].concat(GALLERY_REACTIONS).concat(NUMBER_EMOJIS).includes(reaction.emoji.name)).map(reaction => ({ count: reaction.count, emoji: reaction.emoji.url, name: reaction.emoji.name })),
 			})).filter(({ user, content }) => !PROMPTS_POSTER_IDS.includes(user.id) || content).toReversed();
 			reply = {};
 			for (let i = 0, currentDaily, currentWeekly, previousDaily, previousWeekly; i < messageCollection.length; i++) {
