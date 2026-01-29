@@ -32,13 +32,13 @@ client.on('interactionCreate', async interaction => {
 		let lastMessageYear;
 		let filtered = new Collection();
 		let all = new Collection();
-		const thisYear = new Date().getFullYear();
+		const collectionYear = args.year ?? new Date().getFullYear();
 		do {
 			messages = await interaction.channel.messages.fetch({ limit: 100, before: lastMessageId });
 			const lastMessage = messages?.last();
 			lastMessageYear = lastMessage?.createdAt.getFullYear();
 			lastMessageId = lastMessage?.id;
-			if (lastMessageYear > (args.year ?? thisYear)) {
+			if (lastMessageYear > collectionYear) {
 				continue;
 			}
 			filtered = messages.filter(message => 
@@ -48,11 +48,11 @@ client.on('interactionCreate', async interaction => {
 						&& !message.content.includes('reminder for'))
 					|| (message.author.id == '168034871724343296'
 						&& message.content.includes('----------')))
-				&& message.createdAt.getFullYear() == thisYear);
+				&& message.createdAt.getFullYear() == collectionYear);
 			all = all.concat(filtered);
 			console.log(all.size, 'messages collected')
 		}
-		while (messages.size && lastMessageYear >= thisYear)
+		while (messages.size && lastMessageYear >= collectionYear)
 		return all;
 	}
 
