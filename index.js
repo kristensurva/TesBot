@@ -131,17 +131,20 @@ client.on('interactionCreate', async interaction => {
 				}
 			}
 			try {
-				await fetch(apiURL.replace("{year}", args.year ?? new Date().getFullYear()), {
+				const response = await fetch(apiURL.replace("{year}", args.year ?? new Date().getFullYear()), {
 					method: 'put',
 					headers: {
 						'Content-Type': 'application/json'
 					},
 					body: JSON.stringify(reply)
-				})
+				});
+				if (!response.ok) {
+					throw new Error(response.statusText);
+				}
 				interaction.channel.send("Gallery has been updated!")
 			}
 			catch (err) {
-				interaction.channel.send("Gallery update error.")
+				interaction.channel.send(`Gallery update error: ${err.message}`)
 			}
 			break;
 	}
