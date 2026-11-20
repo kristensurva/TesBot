@@ -132,17 +132,21 @@ client.on('interactionCreate', async interaction => {
 				}
 			}
 			try {
-				const response = await fetch(apiURL.replace("{year}", args.year ?? new Date().getFullYear()), {
-					method: 'put',
-					headers: {
-						'Content-Type': 'application/json',
-						'Content-Encoding': 'gzip',
-						'Content-Length': String(compressed.length),
-					},
-					body: zlib.gzipSync(JSON.stringify(reply))
-				});
-				if (!response.ok) {
-					throw new Error(response.statusText);
+				const CHUNK_SIZE = 1024 * 1024;
+				const buf = Buffer.from(JSON.stringify(reply), 'utf8');
+				
+				for (let offset = 0, isFirst = true; offset < buf.byteLength; offset += CHUNK_SIZE, isFirst = false) {
+					const chunk = buf.subarray(offset, offset + CHUNK_SIZE);
+					
+					const res = await fetch(apiURL.replace("{year}", args.year ?? new Date().getFullYear()), {
+						method: isFirst ? 'PUT' : 'PATCH',
+						headers: { 'Content-Type': 'application/octet-stream' },
+						body: chunk,
+					});
+					
+					if (!res.ok) {
+						throw new Error(`Request failed (${res.status}): ${await res.text()}`);
+					}
 				}
 				interaction.channel.send("Gallery has been updated!")
 			}
