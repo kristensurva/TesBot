@@ -2,6 +2,7 @@
 import { Client, Collection, Intents } from 'discord.js';
 import { apiURL, token } from './config.js';
 import fetch from 'node-fetch';
+import zlib from 'node:zlib';
 // Create a new client instance
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 import { pythonScriptQuote, pythonScriptCount } from './pythonpart.js';
@@ -134,9 +135,11 @@ client.on('interactionCreate', async interaction => {
 				const response = await fetch(apiURL.replace("{year}", args.year ?? new Date().getFullYear()), {
 					method: 'put',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Content-Encoding': 'gzip',
+						'Content-Length': String(compressed.length),
 					},
-					body: JSON.stringify(reply)
+					body: zlib.gzipSync(JSON.stringify(reply))
 				});
 				if (!response.ok) {
 					throw new Error(response.statusText);
