@@ -42,7 +42,7 @@ client.on('interactionCreate', async interaction => {
 			lastMessageDate = lastMessage?.createdAt;
 			lastMessageId = lastMessage?.id;
 		
-			if (lastMessageDate > endDate) {
+			if (!lastMessageDate || lastMessageDate < startDate || lastMessageDate > endDate) {
 				continue;
 			}
 			filtered = messages.filter(message =>
@@ -57,7 +57,7 @@ client.on('interactionCreate', async interaction => {
 			);
 			all = all.concat(filtered);
 			console.log(all.size, 'messages collected');
-		} while (messages.size && lastMessageDate && lastMessageDate >= startDate);
+		} while (messages.size && lastMessageDate && lastMessageDate >= startDate && lastMessageDate <= endDate);
 		return all;
 	}
 
