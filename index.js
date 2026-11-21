@@ -34,26 +34,30 @@ client.on('interactionCreate', async interaction => {
 		let filtered = new Collection();
 		let all = new Collection();
 		const collectionYear = args.year ?? new Date().getFullYear();
+		const startDate = new Date(collectionYear, 0, 1, 0, 0, 0, 0);
+		const endDate = new Date(collectionYear + 1, 0, 31, 23, 59, 59, 999);
 		do {
 			messages = await interaction.channel.messages.fetch({ limit: 100, before: lastMessageId });
 			const lastMessage = messages?.last();
-			lastMessageYear = lastMessage?.createdAt.getFullYear();
+			lastMessageDate = lastMessage?.createdAt;
 			lastMessageId = lastMessage?.id;
-			if (lastMessageYear > collectionYear) {
+		
+			if (lastMessageDate > endDate) {
 				continue;
 			}
-			filtered = messages.filter(message => 
+			filtered = messages.filter(message =>
 				(message.reactions.cache.some(reaction => GALLERY_REACTIONS.includes(reaction.emoji.name))
 					|| (PROMPTS_POSTER_IDS.includes(message.author.id)
 						&& message.content.includes('prompts')
 						&& !message.content.includes('reminder for'))
 					|| (message.author.id == '168034871724343296'
 						&& message.content.includes('----------')))
-				&& message.createdAt.getFullYear() == collectionYear);
+				&& message.createdAt >= startDate
+				&& message.createdAt <= endDate
+			);
 			all = all.concat(filtered);
-			console.log(all.size, 'messages collected')
-		}
-		while (messages.size && lastMessageYear >= collectionYear)
+			console.log(all.size, 'messages collected');
+		} while (messages.size && lastMessageDate && lastMessageDate >= startDate);
 		return all;
 	}
 
