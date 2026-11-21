@@ -33,7 +33,7 @@ client.on('interactionCreate', async interaction => {
 		let lastMessageYear;
 		let filtered = new Collection();
 		let all = new Collection();
-		const collectionYear = args.year ?? new Date().getFullYear();
+		const collectionYear = Number(args.year ?? new Date().getFullYear());
 		const startDate = new Date(collectionYear, 0, 1, 0, 0, 0, 0);
 		const endDate = new Date(collectionYear + 1, 0, 31, 23, 59, 59, 999);
 		do {
@@ -42,7 +42,7 @@ client.on('interactionCreate', async interaction => {
 			lastMessageDate = lastMessage?.createdAt;
 			lastMessageId = lastMessage?.id;
 		
-			if (!lastMessageDate || lastMessageDate < startDate || lastMessageDate > endDate) {
+			if (lastMessageDate > endDate) {
 				continue;
 			}
 			filtered = messages.filter(message =>
@@ -57,7 +57,7 @@ client.on('interactionCreate', async interaction => {
 			);
 			all = all.concat(filtered);
 			console.log(all.size, 'messages collected');
-		} while (messages.size && lastMessageDate && lastMessageDate >= startDate && lastMessageDate <= endDate);
+		} while (messages.size && lastMessageDate >= startDate);
 		return all;
 	}
 
